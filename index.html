@@ -1,0 +1,538 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <title>Sigma Robot RTC</title>
+
+    <style>
+
+        *{
+            margin:0;
+            padding:0;
+            box-sizing:border-box;
+        }
+
+        body{
+
+            background:linear-gradient(
+                135deg,
+                #0f172a,
+                #111827,
+                #020617
+            );
+
+            font-family:Arial;
+
+            color:white;
+
+            overflow:hidden;
+        }
+
+        /* ---------------- HEADER ---------------- */
+
+        h1{
+
+            text-align:center;
+
+            padding:18px;
+
+            font-size:42px;
+
+            letter-spacing:3px;
+
+            font-weight:bold;
+
+            background:rgba(255,255,255,0.05);
+
+            backdrop-filter:blur(10px);
+
+            box-shadow:0 0 20px black;
+
+            border-bottom:2px solid #38bdf8;
+        }
+
+        /* ---------------- MAIN LAYOUT ---------------- */
+
+        .main-container{
+
+            display:flex;
+
+            width:100vw;
+
+            height:calc(100vh - 90px);
+
+            padding:15px;
+
+            gap:15px;
+        }
+
+        /* ---------------- CAMERA SECTION ---------------- */
+
+        .camera-section{
+
+            flex:3;
+
+            position:relative;
+
+            border-radius:25px;
+
+            overflow:hidden;
+
+            background:black;
+
+            box-shadow:
+                0 0 25px #38bdf8,
+                inset 0 0 25px rgba(56,189,248,0.2);
+        }
+
+        .big-camera{
+
+            position:absolute;
+
+            width:100%;
+            height:100%;
+
+            border-radius:25px;
+
+            overflow:hidden;
+
+            transition:0.4s ease;
+        }
+
+        .small-camera{
+
+            position:absolute;
+
+            width:260px;
+            height:190px;
+
+            bottom:20px;
+            right:20px;
+
+            border-radius:20px;
+
+            overflow:hidden;
+
+            border:3px solid white;
+
+            z-index:5;
+
+            box-shadow:0 0 20px black;
+
+            transition:0.4s ease;
+        }
+
+        video{
+
+            width:100%;
+            height:100%;
+
+            object-fit:cover;
+
+            background:black;
+        }
+
+        /* ---------------- STATUS ---------------- */
+
+        .status{
+
+            position:absolute;
+
+            top:15px;
+            left:15px;
+
+            background:rgba(0,0,0,0.5);
+
+            padding:10px 18px;
+
+            border-radius:15px;
+
+            font-size:18px;
+
+            z-index:10;
+
+            backdrop-filter:blur(5px);
+
+            border:1px solid rgba(255,255,255,0.1);
+        }
+
+        /* ---------------- CONTROL PANEL ---------------- */
+
+        .control-section{
+
+            flex:1;
+
+            display:flex;
+
+            justify-content:center;
+            align-items:center;
+
+            background:rgba(255,255,255,0.05);
+
+            backdrop-filter:blur(15px);
+
+            border-radius:25px;
+
+            box-shadow:
+                0 0 20px rgba(0,0,0,0.5),
+                inset 0 0 20px rgba(255,255,255,0.05);
+        }
+
+        .controller{
+
+            display:flex;
+
+            flex-direction:column;
+
+            gap:22px;
+        }
+
+        .row{
+
+            display:flex;
+
+            justify-content:center;
+
+            gap:22px;
+        }
+
+        /* ---------------- BUTTONS ---------------- */
+
+        button{
+
+            width:95px;
+            height:95px;
+
+            border:none;
+
+            border-radius:24px;
+
+            font-size:42px;
+
+            color:white;
+
+            background:linear-gradient(
+                145deg,
+                #1e293b,
+                #334155
+            );
+
+            box-shadow:
+                0 8px 20px rgba(0,0,0,0.5),
+                inset 0 2px 5px rgba(255,255,255,0.1);
+
+            cursor:pointer;
+
+            transition:0.15s ease;
+        }
+
+        button:hover{
+
+            transform:scale(1.08);
+
+            background:linear-gradient(
+                145deg,
+                #0ea5e9,
+                #38bdf8
+            );
+        }
+
+        button:active{
+
+            transform:scale(0.92);
+
+            background:#0284c7;
+        }
+
+    </style>
+
+</head>
+
+<body>
+
+<h1>🚀 SIGMA ROBOT CONTROL PANEL</h1>
+
+<div class="main-container">
+
+    <!-- CAMERA AREA -->
+
+    <div class="camera-section">
+
+        <div class="status" id="statusText">
+
+            Current Mode : FORWARD
+
+        </div>
+
+        <!-- FRONT CAMERA -->
+
+        <div id="frontBox" class="big-camera">
+
+            <video
+                id="frontVideo"
+                autoplay
+                playsinline
+                muted
+            ></video>
+
+        </div>
+
+        <!-- BACK CAMERA -->
+
+        <div id="backBox" class="small-camera">
+
+            <video
+                id="backVideo"
+                autoplay
+                playsinline
+                muted
+            ></video>
+
+        </div>
+
+    </div>
+
+    <!-- CONTROL AREA -->
+
+    <div class="control-section">
+
+        <div class="controller">
+
+            <!-- FORWARD -->
+
+            <div class="row">
+
+                <button
+                    onmousedown="startCommand('F')"
+                    onmouseup="stopCommand()"
+                    ontouchstart="startCommand('F')"
+                    ontouchend="stopCommand()"
+                >
+                    ↑
+                </button>
+
+            </div>
+
+            <!-- LEFT / STOP / RIGHT -->
+
+            <div class="row">
+
+                <button
+                    onmousedown="startCommand('L')"
+                    onmouseup="stopCommand()"
+                    ontouchstart="startCommand('L')"
+                    ontouchend="stopCommand()"
+                >
+                    ←
+                </button>
+
+                <button
+                    onmousedown="startCommand('S')"
+                >
+                    ■
+                </button>
+
+                <button
+                    onmousedown="startCommand('R')"
+                    onmouseup="stopCommand()"
+                    ontouchstart="startCommand('R')"
+                    ontouchend="stopCommand()"
+                >
+                    →
+                </button>
+
+            </div>
+
+            <!-- BACKWARD -->
+
+            <div class="row">
+
+                <button
+                    onmousedown="startCommand('B')"
+                    onmouseup="stopCommand()"
+                    ontouchstart="startCommand('B')"
+                    ontouchend="stopCommand()"
+                >
+                    ↓
+                </button>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+<script>
+
+    // ---------------- WEBRTC CONNECTIONS ---------------- //
+
+    let frontPc = new RTCPeerConnection();
+
+    let backPc = new RTCPeerConnection();
+
+    let frontChannel =
+        frontPc.createDataChannel("commands");
+
+    let interval;
+
+    // ---------------- FRONT STREAM ---------------- //
+
+    frontPc.ontrack = (event) => {
+
+        document.getElementById(
+            "frontVideo"
+        ).srcObject = event.streams[0];
+    };
+
+    // ---------------- BACK STREAM ---------------- //
+
+    backPc.ontrack = (event) => {
+
+        document.getElementById(
+            "backVideo"
+        ).srcObject = event.streams[0];
+    };
+
+    // ---------------- START RTC ---------------- //
+
+    async function startRTC(pc, endpoint){
+
+        pc.addTransceiver(
+            'video',
+            { direction: 'recvonly' }
+        );
+
+        const offer = await pc.createOffer();
+
+        await pc.setLocalDescription(offer);
+
+        const response = await fetch(endpoint, {
+
+            method:'POST',
+
+            headers:{
+                'Content-Type':'application/json'
+            },
+
+            body:JSON.stringify({
+
+                sdp:pc.localDescription.sdp,
+                type:pc.localDescription.type
+            })
+        });
+
+        const answer = await response.json();
+
+        await pc.setRemoteDescription(answer);
+    }
+
+    // ---------------- SEND COMMAND ---------------- //
+
+    function sendCommand(cmd){
+
+        if(frontChannel.readyState === "open"){
+
+            frontChannel.send(cmd);
+        }
+
+        updateCameraMode(cmd);
+    }
+
+    // ---------------- HOLD BUTTON ---------------- //
+
+    function startCommand(cmd){
+
+        sendCommand(cmd);
+
+        interval = setInterval(() => {
+
+            sendCommand(cmd);
+
+        }, 100);
+    }
+
+    // ---------------- STOP BUTTON ---------------- //
+
+    function stopCommand(){
+
+        clearInterval(interval);
+
+        sendCommand('S');
+    }
+
+    // ---------------- CAMERA PRIORITY ---------------- //
+
+    function updateCameraMode(cmd){
+
+        const front =
+            document.getElementById("frontBox");
+
+        const back =
+            document.getElementById("backBox");
+
+        const status =
+            document.getElementById("statusText");
+
+        if(cmd == "F"){
+
+            front.className = "big-camera";
+            back.className = "small-camera";
+
+            status.innerHTML =
+                "Current Mode : FORWARD";
+        }
+
+        else if(cmd == "B"){
+
+            back.className = "big-camera";
+            front.className = "small-camera";
+
+            status.innerHTML =
+                "Current Mode : BACKWARD";
+        }
+
+        else if(cmd == "L"){
+
+            status.innerHTML =
+                "Current Mode : LEFT";
+        }
+
+        else if(cmd == "R"){
+
+            status.innerHTML =
+                "Current Mode : RIGHT";
+        }
+
+        else if(cmd == "S"){
+
+            status.innerHTML =
+                "Current Mode : STOPPED";
+        }
+    }
+
+    // ---------------- START EVERYTHING ---------------- //
+
+    window.onload = async () => {
+
+        await startRTC(
+            frontPc,
+            "/offer_front"
+        );
+
+        await startRTC(
+            backPc,
+            "/offer_back"
+        );
+    };
+
+</script>
+
+</body>
+
+</html>

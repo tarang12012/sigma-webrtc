@@ -1,6 +1,6 @@
 import cv2
 import av
-
+from serial8 import *
 from aiohttp import web
 
 from aiortc import (
@@ -143,22 +143,27 @@ async def offer_front(request):
             if message == "F":
 
                 print("Moving Forward")
+                send_2()
 
             elif message == "B":
 
                 print("Moving Backward")
+                send_8()
 
             elif message == "L":
 
                 print("Turning Left")
+                send_4()
 
             elif message == "R":
 
                 print("Turning Right")
+                send_6()
 
             elif message == "S":
 
                 print("Stopping Robot")
+                send_5()
 
     pc.addTrack(FrontCameraTrack())
 

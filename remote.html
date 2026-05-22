@@ -4,69 +4,285 @@
 
 <head>
 
-    <title>Sigma Robot Remote</title>
+    <meta charset="UTF-8">
+
+    <title>Sigma Robot RTC</title>
 
     <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
 
     <style>
 
+        *{
+            margin:0;
+            padding:0;
+            box-sizing:border-box;
+        }
+
         body{
 
-            background:#0f172a;
-
-            color:white;
+            background:
+            linear-gradient(
+                135deg,
+                #020617,
+                #0f172a,
+                #111827
+            );
 
             font-family:Arial;
 
-            text-align:center;
+            color:white;
 
-            margin:0;
+            overflow:hidden;
         }
 
-        h1{
+        /* =======================================================
+           HEADER
+        ======================================================= */
 
-            padding:20px;
+        .header{
+
+            width:100%;
+            height:80px;
+
+            display:flex;
+
+            justify-content:space-between;
+
+            align-items:center;
+
+            padding:0 30px;
+
+            background:rgba(255,255,255,0.05);
+
+            backdrop-filter:blur(10px);
+
+            border-bottom:
+            2px solid rgba(56,189,248,0.4);
+
+            box-shadow:0 0 20px black;
+        }
+
+        .title{
+
+            font-size:36px;
+
+            font-weight:bold;
+
+            letter-spacing:2px;
+
+            color:#38bdf8;
+        }
+
+        .status{
+
+            padding:12px 20px;
+
+            border-radius:15px;
+
+            background:rgba(0,0,0,0.4);
+
+            border:
+            1px solid rgba(255,255,255,0.1);
+
+            font-size:18px;
+        }
+
+        /* =======================================================
+           MAIN CONTAINER
+        ======================================================= */
+
+        .main{
+
+            width:100vw;
+
+            height:calc(100vh - 80px);
+
+            display:flex;
+
+            padding:15px;
+
+            gap:15px;
+        }
+
+        /* =======================================================
+           CAMERA SECTION
+        ======================================================= */
+
+        .camera-section{
+
+            flex:3;
+
+            position:relative;
+
+            border-radius:25px;
+
+            overflow:hidden;
+
+            background:black;
+
+            box-shadow:
+            0 0 25px rgba(56,189,248,0.3);
+        }
+
+        .main-camera{
+
+            position:absolute;
+
+            width:100%;
+            height:100%;
+
+            overflow:hidden;
+        }
+
+        .small-camera{
+
+            position:absolute;
+
+            width:260px;
+            height:180px;
+
+            bottom:20px;
+            right:20px;
+
+            z-index:5;
+
+            border-radius:18px;
+
+            overflow:hidden;
+
+            border:3px solid white;
+
+            box-shadow:
+            0 0 20px rgba(0,0,0,0.7);
         }
 
         video{
 
-            width:80vw;
+            width:100%;
+            height:100%;
 
-            border-radius:20px;
+            object-fit:cover;
 
-            border:4px solid #38bdf8;
-
-            margin-top:20px;
+            background:black;
         }
 
-        .controls{
+        /* =======================================================
+           CONTROL PANEL
+        ======================================================= */
 
-            margin-top:30px;
+        .control-panel{
+
+            flex:1;
+
+            border-radius:25px;
+
+            background:rgba(255,255,255,0.05);
+
+            backdrop-filter:blur(15px);
+
+            display:flex;
+
+            justify-content:center;
+
+            align-items:center;
+
+            box-shadow:
+            0 0 20px rgba(0,0,0,0.5);
         }
+
+        .controller{
+
+            display:flex;
+
+            flex-direction:column;
+
+            gap:20px;
+        }
+
+        .row{
+
+            display:flex;
+
+            justify-content:center;
+
+            gap:20px;
+        }
+
+        /* =======================================================
+           BUTTONS
+        ======================================================= */
 
         button{
 
-            width:100px;
-            height:100px;
-
-            margin:10px;
-
-            font-size:35px;
+            width:95px;
+            height:95px;
 
             border:none;
 
-            border-radius:20px;
+            border-radius:24px;
 
-            background:#1e293b;
+            font-size:42px;
 
             color:white;
 
+            background:
+            linear-gradient(
+                145deg,
+                #1e293b,
+                #334155
+            );
+
+            box-shadow:
+            0 8px 20px rgba(0,0,0,0.5),
+            inset 0 2px 5px rgba(255,255,255,0.1);
+
             cursor:pointer;
+
+            transition:0.15s ease;
         }
 
         button:hover{
 
-            background:#38bdf8;
+            transform:scale(1.08);
+
+            background:
+            linear-gradient(
+                145deg,
+                #0ea5e9,
+                #38bdf8
+            );
+        }
+
+        button:active{
+
+            transform:scale(0.92);
+        }
+
+        /* =======================================================
+           CAMERA LABELS
+        ======================================================= */
+
+        .camera-label{
+
+            position:absolute;
+
+            top:15px;
+            left:15px;
+
+            z-index:10;
+
+            padding:10px 18px;
+
+            border-radius:14px;
+
+            background:rgba(0,0,0,0.5);
+
+            backdrop-filter:blur(5px);
+
+            font-size:18px;
+
+            border:
+            1px solid rgba(255,255,255,0.1);
         }
 
     </style>
@@ -75,124 +291,409 @@
 
 <body>
 
-<h1>🚀 SIGMA ROBOT REMOTE</h1>
+    <!-- ===================================================
+         HEADER
+    ==================================================== -->
 
-<video
-    id="video"
-    autoplay
-    playsinline
-    muted
-></video>
+    <div class="header">
 
-<div class="controls">
+        <div class="title">
 
-    <div>
+            🚀 SIGMA ROBOT
 
-        <button onmousedown="send('F')">↑</button>
+        </div>
 
-    </div>
+        <div
+            class="status"
+            id="statusText"
+        >
 
-    <div>
+            CONNECTING...
 
-        <button onmousedown="send('L')">←</button>
-
-        <button onmousedown="send('S')">■</button>
-
-        <button onmousedown="send('R')">→</button>
+        </div>
 
     </div>
 
-    <div>
+    <!-- ===================================================
+         MAIN SECTION
+    ==================================================== -->
 
-        <button onmousedown="send('B')">↓</button>
+    <div class="main">
+
+        <!-- ===============================================
+             CAMERA AREA
+        ================================================ -->
+
+        <div class="camera-section">
+
+            <div class="camera-label">
+
+                LIVE CAMERA
+
+            </div>
+
+            <!-- MAIN CAMERA -->
+
+            <div class="main-camera">
+
+                <video
+                    id="frontVideo"
+                    autoplay
+                    playsinline
+                    muted
+                ></video>
+
+            </div>
+
+            <!-- SMALL CAMERA -->
+
+            <div class="small-camera">
+
+                <video
+                    id="smallVideo"
+                    autoplay
+                    playsinline
+                    muted
+                ></video>
+
+            </div>
+
+        </div>
+
+        <!-- ===============================================
+             CONTROL PANEL
+        ================================================ -->
+
+        <div class="control-panel">
+
+            <div class="controller">
+
+                <!-- FORWARD -->
+
+                <div class="row">
+
+                    <button
+                        onmousedown="startCommand('F')"
+                        onmouseup="stopCommand()"
+                        ontouchstart="startCommand('F')"
+                        ontouchend="stopCommand()"
+                    >
+                        ↑
+                    </button>
+
+                </div>
+
+                <!-- LEFT STOP RIGHT -->
+
+                <div class="row">
+
+                    <button
+                        onmousedown="startCommand('L')"
+                        onmouseup="stopCommand()"
+                        ontouchstart="startCommand('L')"
+                        ontouchend="stopCommand()"
+                    >
+                        ←
+                    </button>
+
+                    <button
+                        onclick="sendCommand('S')"
+                    >
+                        ■
+                    </button>
+
+                    <button
+                        onmousedown="startCommand('R')"
+                        onmouseup="stopCommand()"
+                        ontouchstart="startCommand('R')"
+                        ontouchend="stopCommand()"
+                    >
+                        →
+                    </button>
+
+                </div>
+
+                <!-- BACKWARD -->
+
+                <div class="row">
+
+                    <button
+                        onmousedown="startCommand('B')"
+                        onmouseup="stopCommand()"
+                        ontouchstart="startCommand('B')"
+                        ontouchend="stopCommand()"
+                    >
+                        ↓
+                    </button>
+
+                </div>
+
+            </div>
+
+        </div>
 
     </div>
-
-</div>
 
 <script>
 
-const SIGNAL_SERVER =
-"https://sigma-webrtc.onrender.com";
+    // ======================================================
+    // SIGNALING SERVER
+    // ======================================================
 
-const socket = io(SIGNAL_SERVER);
+    const SIGNAL_SERVER = "https://sigma-webrtc.onrender.com";
 
-const pc = new RTCPeerConnection({
+    // Example:
+    // https://sigma-webrtc.onrender.com
 
-    iceServers:[
+    // ======================================================
+    // SOCKET
+    // ======================================================
 
-        {
-            urls:[
-                "stun:stun.l.google.com:19302"
-            ]
-        }
-    ]
-});
+    const socket = io(SIGNAL_SERVER);
 
-let dataChannel;
+    // ======================================================
+    // RTC CONNECTION
+    // ======================================================
 
-// ---------------- SOCKET CONNECT ---------------- //
+    const pc = new RTCPeerConnection({
 
-socket.on("connect", async () => {
+        iceServers:[
 
-    console.log("Connected");
-
-    socket.emit("register", {
-
-        type:"browser"
+            {
+                urls:[
+                    "stun:stun.l.google.com:19302"
+                ]
+            }
+        ]
     });
 
-    dataChannel =
-        pc.createDataChannel("commands");
+    // ======================================================
+    // ICE CANDIDATES
+    // ======================================================
+
+    pc.onicecandidate = (event) => {
+
+        if(event.candidate){
+
+            socket.emit("signal", {
+
+                target:"robot",
+
+                type:"candidate",
+
+                candidate:event.candidate.candidate,
+
+                sdpMid:event.candidate.sdpMid,
+
+                sdpMLineIndex:event.candidate.sdpMLineIndex
+            });
+        }
+    };
+
+    // ======================================================
+    // VIDEO TRACK
+    // ======================================================
 
     pc.ontrack = (event) => {
 
+        console.log("Video stream received");
+
+        const stream = event.streams[0];
+
         document.getElementById(
-            "video"
-        ).srcObject = event.streams[0];
+            "frontVideo"
+        ).srcObject = stream;
+
+        document.getElementById(
+            "smallVideo"
+        ).srcObject = stream;
+
+        document.getElementById(
+            "statusText"
+        ).innerHTML = "CONNECTED";
     };
 
-    const offer =
+    // ======================================================
+    // DATA CHANNEL
+    // ======================================================
+
+    let dataChannel;
+
+    // ======================================================
+    // SOCKET CONNECT
+    // ======================================================
+
+    socket.on("connect", async () => {
+
+        console.log("Connected to signaling server");
+
+        document.getElementById(
+            "statusText"
+        ).innerHTML = "SIGNAL CONNECTED";
+
+        socket.emit("register", {
+
+            type:"browser"
+        });
+
+        // -----------------------------------------------
+
+        dataChannel =
+        pc.createDataChannel("commands");
+
+        dataChannel.onopen = () => {
+
+            console.log(
+                "Data channel opened"
+            );
+
+            document.getElementById(
+                "statusText"
+            ).innerHTML = "RTC CONNECTED";
+        };
+
+        // -----------------------------------------------
+
+        const offer =
         await pc.createOffer();
 
-    await pc.setLocalDescription(
-        offer
-    );
+        await pc.setLocalDescription(
+            offer
+        );
 
-    socket.emit("signal", {
+        socket.emit("signal", {
 
-        target:"robot",
+            target:"robot",
 
-        type:"offer",
+            type:"offer",
 
-        sdp:pc.localDescription.sdp
-    });
-});
-
-// ---------------- SIGNALS ---------------- //
-
-socket.on("signal", async (data) => {
-
-    if(data.type == "answer"){
-
-        await pc.setRemoteDescription({
-
-            type:"answer",
-
-            sdp:data.sdp
+            sdp:pc.localDescription.sdp
         });
+    });
+
+    // ======================================================
+    // SIGNAL HANDLER
+    // ======================================================
+
+    socket.on("signal", async (data) => {
+
+        console.log("Signal:", data.type);
+
+        // --------------------------------------------------
+
+        if(data.type == "answer"){
+
+            await pc.setRemoteDescription({
+
+                type:"answer",
+
+                sdp:data.sdp
+            });
+
+            console.log(
+                "Remote description set"
+            );
+        }
+
+        // --------------------------------------------------
+
+        else if(data.type == "candidate"){
+
+            await pc.addIceCandidate({
+
+                candidate:data.candidate,
+
+                sdpMid:data.sdpMid,
+
+                sdpMLineIndex:data.sdpMLineIndex
+            });
+
+            console.log(
+                "ICE candidate added"
+            );
+        }
+    });
+
+    // ======================================================
+    // COMMANDS
+    // ======================================================
+
+    function sendCommand(cmd){
+
+        if(
+            dataChannel &&
+            dataChannel.readyState === "open"
+        ){
+
+            dataChannel.send(cmd);
+
+            console.log(
+                "Command Sent:",
+                cmd
+            );
+
+            // ------------------------------------------
+
+            if(cmd == "F"){
+
+                document.getElementById(
+                    "statusText"
+                ).innerHTML = "MOVING FORWARD";
+            }
+
+            else if(cmd == "B"){
+
+                document.getElementById(
+                    "statusText"
+                ).innerHTML = "MOVING BACKWARD";
+            }
+
+            else if(cmd == "L"){
+
+                document.getElementById(
+                    "statusText"
+                ).innerHTML = "TURNING LEFT";
+            }
+
+            else if(cmd == "R"){
+
+                document.getElementById(
+                    "statusText"
+                ).innerHTML = "TURNING RIGHT";
+            }
+
+            else if(cmd == "S"){
+
+                document.getElementById(
+                    "statusText"
+                ).innerHTML = "STOPPED";
+            }
+        }
     }
-});
 
-// ---------------- COMMANDS ---------------- //
+    // ======================================================
+    // HOLD BUTTON FUNCTIONALITY
+    // ======================================================
 
-function send(cmd){
+    let interval;
 
-    if(dataChannel.readyState === "open"){
+    function startCommand(cmd){
 
-        dataChannel.send(cmd);
+        sendCommand(cmd);
+
+        interval = setInterval(() => {
+
+            sendCommand(cmd);
+
+        }, 100);
     }
-}
+
+    function stopCommand(){
+
+        clearInterval(interval);
+
+        sendCommand("S");
+    }
 
 </script>
 

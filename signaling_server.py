@@ -1,8 +1,12 @@
 from aiohttp import web
 import socketio
 
+# ---------------- SOCKET SERVER ---------------- #
+
 sio = socketio.AsyncServer(
+
     cors_allowed_origins='*',
+
     async_mode='aiohttp'
 )
 
@@ -10,7 +14,7 @@ app = web.Application()
 
 sio.attach(app)
 
-# ---------------- STORE CLIENTS ---------------- #
+# ---------------- CLIENT STORAGE ---------------- #
 
 clients = {}
 
@@ -30,7 +34,7 @@ async def register(sid, data):
 
     print(f"{data['type']} registered")
 
-# ---------------- SIGNALING ---------------- #
+# ---------------- SIGNAL ---------------- #
 
 @sio.event
 async def signal(sid, data):
@@ -40,8 +44,11 @@ async def signal(sid, data):
     if target in clients:
 
         await sio.emit(
+
             "signal",
+
             data,
+
             to=clients[target]
         )
 
@@ -57,7 +64,10 @@ async def disconnect(sid):
 if __name__ == '__main__':
 
     web.run_app(
+
         app,
+
         host='0.0.0.0',
+
         port=5000
     )
